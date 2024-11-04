@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PaginationKotlin</string>
+    <string name="loading_more_posts">Loading more posts...</string>
+</resources>
