@@ -8,6 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -30,27 +35,32 @@ class MainActivity : AppCompatActivity() {
         val apiService = retrofit.create(ApiService::class.java)
         val repository = PostRepository(apiService)
 
-        postViewModel = ViewModelProvider(this, PostViewModelFactory(repository))[PostViewModel::class.java]
+        postViewModel =
+            ViewModelProvider(this, PostViewModelFactory(repository))[PostViewModel::class.java]
 
         recyclerView = findViewById(R.id.recycler_view)
-        progressBar = findViewById(R.id.progressBar)
+        progressBar = findViewById(R.id.MainProgressBar)
+
         adapter = PostAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // Observe posts LiveData
+        progressBar.visibility = View.VISIBLE
+
         postViewModel.posts.observe(this) { posts ->
-            // Hide the loader when posts are available
-            progressBar.visibility = View.GONE
-            if (posts.isEmpty()) {
-                Log.d("MainActivity", "No posts available.")
-            } else {
-                Log.d("MainActivity", "Posts updated: ${posts.size} items")
-                adapter.submitList(posts)
+
+            CoroutineScope(Dispatchers.Main).launch {
+                if (posts.isEmpty()) {
+                    Log.d("MainActivity", "No posts available.")
+                } else {
+                    delay(5000)
+                    progressBar.visibility = View.GONE
+                    Log.d("MainActivity", "Posts updated: ${posts.size} items")
+                    adapter.submitList(posts)
+                }
             }
         }
 
-//        progressBar.visibility = View.VISIBLE
         postViewModel.loadPosts(postViewModel.currentPage, 10)
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {

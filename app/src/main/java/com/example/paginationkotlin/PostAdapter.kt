@@ -22,11 +22,13 @@ class PostAdapter : ListAdapter<ListItem, RecyclerView.ViewHolder>(PostDiffCallb
                     .inflate(R.layout.item_view, parent, false)
                 PostViewHolder(view)
             }
+
             VIEW_TYPE_LOADING -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.loading_item, parent, false)
                 LoadingViewHolder(view)
             }
+
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -37,6 +39,7 @@ class PostAdapter : ListAdapter<ListItem, RecyclerView.ViewHolder>(PostDiffCallb
                 val post = getItem(position) as ListItem.PostItem
                 holder.bind(post.post)
             }
+
             is LoadingViewHolder -> {
             }
         }
@@ -50,8 +53,8 @@ class PostAdapter : ListAdapter<ListItem, RecyclerView.ViewHolder>(PostDiffCallb
     }
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.textView)
-        private val body: TextView = itemView.findViewById(R.id.textView2)
+        private val title: TextView = itemView.findViewById(R.id.txtTitle)
+        private val body: TextView = itemView.findViewById(R.id.txtBody)
 
         fun bind(post: Post) {
             title.text = post.title

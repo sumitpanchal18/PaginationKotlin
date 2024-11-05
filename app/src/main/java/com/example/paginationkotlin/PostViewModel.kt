@@ -32,7 +32,9 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
         Log.d("PostViewModel", "Fetching posts: page $page, limit $limit")
 
         viewModelScope.launch {
-            _posts.value = (_posts.value ?: emptyList()) + ListItem.LoadingItem
+            if (page > 1) {
+                _posts.value = (_posts.value ?: emptyList()) + ListItem.LoadingItem
+            }
 
             delay(1000)
 
@@ -44,16 +46,24 @@ class PostViewModel(private val repository: PostRepository) : ViewModel() {
                     Log.d("PostViewModel", "Fetched ${newPosts.size} posts successfully.")
 
                     val currentPosts =
-                        _posts.value?.filterIsInstance<ListItem.PostItem>() ?: emptyList()
-                    val updatedPosts = (currentPosts + newPosts.map { ListItem.PostItem(it) })
+                        _posts.value?.filterNot { it is ListItem.LoadingItem } ?: emptyList()
+
+                    val updatedPosts = currentPosts + newPosts.map { ListItem.PostItem(it) }
                     _posts.value = updatedPosts
+
                     currentPage++
                 } ?: run {
                     Log.d("PostViewModel", "Response body is null.")
                 }
             } else {
-                Log.e("PostViewModel","Error fetching posts: ${response.code()} - ${response.message()}")
+                Log.e(
+                    "PostViewModel",
+                    "Error fetching posts: ${response.code()} - ${response.message()}"
+                )
             }
+
+            _posts.value = _posts.value?.filterNot { it is ListItem.LoadingItem }
         }
     }
+
 }
